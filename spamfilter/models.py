@@ -1,5 +1,5 @@
 import sys
-import numpy as np
+import json
 from django.db import models
 from collections import defaultdict
 from naivebayes import util
@@ -33,5 +33,11 @@ class Distribution(models.Model):
         # rows correspond to true label, columns correspond to guessed label
         performance_measures = np.zeros([2,2])
 
-        (self.logProbabilities, self.logPrior) = (log_probabilities_by_category, log_priors_by_category)
-        self.performanceMeasures = performance_measures
+        (self.logProbabilities, self.logPrior) = (json.dumps(log_probabilities_by_category, ensure_ascii=False).decode('latin-1'), json.dumps(log_priors_by_category))
+
+        # Used for measuring performance.
+        # self.performanceMeasures = json.dumps(performance_measures)
+
+    def save(self, *args, **kwargs):
+        self.logProbabilities = self.logProbabilities.decode('latin-1')
+        super(Distribution, self).save(*args, **kwargs)

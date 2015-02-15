@@ -20,9 +20,14 @@ def upload_file(request):
     return HttpResponse('Done')
 
 def runbayes(request):
-    d = Distribution()
-    print >>sys.stderr, d.logProbabilities
-    print >>sys.stderr, d.logPrior
+    distributions = Distribution.objects.all()
+    if len(distributions) == 0:
+        d = Distribution()
+        d.learn()
+    else:
+        d = distributions[1]
+    print >>sys.stderr, json.loads(d.logProbabilities, encoding='latin-1')
+    return HttpResponse('A - OK')
 
 def home(request):
     return HttpResponse("hey dude, welcome!")
