@@ -2,6 +2,9 @@ led / optimized / DLL files
 __pycache__/
 *.py[cod]
 
+# naivebayes data -- possibly add in later
+naivebayes/data/
+
 # C extensions
 *.so
 

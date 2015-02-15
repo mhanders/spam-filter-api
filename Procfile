@@ -1,1 +1,1 @@
-web: gunicorn spamfilter.wsgi --log-file -
+web: gunicorn --timeout=90 spamfilter.wsgi --log-file -
