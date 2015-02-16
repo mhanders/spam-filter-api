@@ -27,6 +27,5 @@ def runbayes(request):
 
     out = {}
     for (fileName, file) in request.FILES.items():
-        out[fileName] = util.classifyMessage(file, logProbabilities, logPrior, defaultProbabilities)
+        out[fileName] = naivebayes.classifyMessage(file, logProbabilities, logPrior, defaultProbabilities)
     return HttpResponse(json.dumps(out))
-    # return HttpResponse('A - OK')
