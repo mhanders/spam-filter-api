@@ -33,12 +33,6 @@ class Distribution(models.Model):
         #Get default probabilities stored, as these are lost when we serialize the dicts
         self.defaultProbabilities = json.dumps([log_probabilities_by_category[0][-1], log_probabilities_by_category[1][-1]])
 
-        # Used for measuring performance, so commented out right now
-            # Here, columns and rows are indexed by 0 = 'spam' and 1 = 'ham'
-            # rows correspond to true label, columns correspond to guessed label
-            # performance_measures = np.zeros([2,2])
-            # self.performanceMeasures = json.dumps(performance_measures)
-
 
         (self.logProbabilities, self.logPrior) = \
             (json.dumps(log_probabilities_by_category,ensure_ascii=False),\

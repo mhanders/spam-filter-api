@@ -5,27 +5,11 @@ import numpy as np
 
 import util
 
-USAGE = "%s <test data folder> <spam folder> <ham folder>"
-
-TESTING_FOLDER = "naivebayes/data/testing"
-SPAM_FOLDER = "naivebayes/data/spam"
-HAM_FOLDER = "naivebayes/data/ham"
+from collections import Counter, defaultdict
 
 def get_counts(file_list):
-    """
-    Computes counts for each word that occurs in the files in file_list.
 
-    Inputs
-    ------
-    file_list : a list of filenames, suitable for use with open() or
-                util.get_words_in_file()
-
-    Output
-    ------
-    A dict whose keys are words, and whose values are the number of files the
-    key occurred in.
-    """
-    counts = util.Counter()
+    counts = Counter()
     for f in file_list:
         words = util.get_words_in_file(f)
         for w in set(words):
@@ -33,29 +17,10 @@ def get_counts(file_list):
     return counts
 
 def get_log_probabilities(file_list):
-    """
-    Computes log-frequencies for each word that occurs in the files in
-    file_list.
-
-    Input
-    -----
-    file_list : a list of filenames, suitable for use with open() or
-                util.get_words_in_file()
-
-    Output
-    ------
-    A dict whose keys are words, and whose values are the log of the smoothed
-    estimate of the fraction of files the key occurred in.
-
-    Hint
-    ----
-    The data structure util.DefaultDict will be useful to you here, as will the
-    get_counts() helper above.
-    """
     counts = get_counts(file_list)
     N_files = len(file_list)
     N_categories = 2
-    log_prob = util.DefaultDict(lambda : -np.log(N_files + N_categories))
+    log_prob = defaultdict(lambda : -np.log(N_files + N_categories))
     for word in counts:
         log_prob[word] = np.log(counts[word] + 1) - np.log(N_files + N_categories)
         assert log_prob[word] < 0
@@ -93,104 +58,3 @@ def learn_distributions(file_lists_by_category):
     log_prior_by_category = [np.log(p/sum(prior_by_category)) for p in prior_by_category]
 
     return (log_probs_by_category, log_prior_by_category)
-
-def classify_message(message_filename,
-                     log_probabilities_by_category,
-                     log_prior_by_category,
-                     names = ['spam', 'ham']):
-    """
-    Uses Naive Bayes classification to classify the message in the given file.
-
-    Inputs
-    ------
-    message_filename : name of the file containing the message to be classified
-
-    log_probabilities_by_category : See output of learn_distributions
-
-    log_prior_by_category : See output of learn_distributions
-
-    names : labels for each class (for this problem set, will always be just
-            spam and ham).
-
-    Output
-    ------
-    One of the labels in names.
-    """
-
-    message_words = set(util.get_words_in_file(message_filename))
-    N_categories  = len(log_probabilities_by_category)
-
-    # get the union of all words encountered during training
-    all_words = []
-    for i in xrange(N_categories):
-        all_words += log_probabilities_by_category[i].keys()
-    all_words = list(set(all_words))
-
-    log_likelihoods = []
-    for i in xrange(N_categories):
-        total = 0
-        all_word_log_probs = log_probabilities_by_category[i]
-        for w in all_words:
-            log_prob = all_word_log_probs[w]
-            test = (w in message_words)
-            total += test*log_prob + (1-test)*np.log(1-np.exp(log_prob))
-        log_likelihoods.append(total)
-    posterior = np.array(log_likelihoods) + np.array(log_prior_by_category)
-    winner = np.argmax(posterior)
-    return names[winner]
-
-def classify():
-#     ### Read arguments
-#     if len(sys.argv) != 4:
-#         print USAGE % sys.argv[0]
-#     testing_folder = sys.argv[1]
-#     (spam_folder, ham_folder) = sys.argv[2:4]
-    #
-    # testing_folder = TESTING_FOLDER
-    # (spam_folder, ham_folder) = (SPAM_FOLDER, HAM_FOLDER)
-    #
-    #
-    # ### Learn the distributions
-    # print("Training...")
-    # file_lists = []
-    # for folder in (spam_folder, ham_folder):
-    #     file_lists.append(util.get_files_in_folder(folder))
-    # (log_probabilities_by_category, log_priors_by_category) = \
-    #         learn_distributions(file_lists)
-    #
-    # # Here, columns and rows are indexed by 0 = 'spam' and 1 = 'ham'
-    # # rows correspond to true label, columns correspond to guessed label
-    # performance_measures = np.zeros([2,2])
-
-    ### Classify and measure performance
-    print("Testing...")
-    idx = 1
-    for filename in (util.get_files_in_folder(testing_folder)):
-        print >>sys.stderr, idx
-        idx += 1
-        ## Classify
-        label = classify_message(filename,
-                                 log_probabilities_by_category,
-                                 log_priors_by_category,
-                                 ['spam', 'ham'])
-        ## Measure performance
-        # Use the filename to determine the true label
-        base = os.path.basename(filename)
-        true_index = ('ham' in base)
-        guessed_index = (label == 'ham')
-        performance_measures[true_index, guessed_index] += 1
-
-
-        # Uncomment this line to see which files your classifier
-        # gets right/wrong:
-        #print("%s : %s" %(label, filename))
-
-    template="You correctly classified %d out of %d spam messages, and %d out of %d ham messages."
-    # Correct counts are on the diagonal
-    correct = np.diag(performance_measures)
-    # totals are obtained by summing across guessed labels
-    totals = np.sum(performance_measures, 1)
-    print(template % (correct[0],
-                      totals[0],
-                      correct[1],
-                      totals[1]))
