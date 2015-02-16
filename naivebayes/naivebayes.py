@@ -37,10 +37,10 @@ def learn_distributions(file_lists_by_category):
 
     return (log_probs_by_category, log_prior_by_category)
 
-def classifyMessage(file,
+def classify_message(file,
                      log_probabilities_by_category,
                      log_prior_by_category,
-                     defaultProbabilities,
+                     default_probabilities,
                      names = ['spam', 'ham']):
 
     # message_words = set(util.get_words_in_file(message_filename))
@@ -61,7 +61,7 @@ def classifyMessage(file,
             if w in all_word_log_probs:
                 log_prob = all_word_log_probs[w]
             else:
-                log_prob = defaultProbabilities[i]
+                log_prob = default_probabilities[i]
             test = (w in message_words)
             total += test*log_prob + (1-test)*np.log(1-np.exp(log_prob))
         log_likelihoods.append(total)

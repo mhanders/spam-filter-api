@@ -22,10 +22,10 @@ def runbayes(request):
         print >>sys.stderr, "Could not find or generate a distribution."
         return HttpResponseServerError()
 
-    (logProbabilities, logPrior, defaultProbabilities) = (json.loads(d.logProbabilities, encoding='latin-1'), \
-        json.loads(d.logPrior), json.loads(d.defaultProbabilities))
+    (log_probabilities, log_priors, default_probabilities) = (json.loads(d.log_probabilities, encoding='latin-1'), \
+        json.loads(d.log_priors), json.loads(d.default_probabilities))
 
     out = {}
     for (fileName, file) in request.FILES.items():
-        out[fileName] = naivebayes.classifyMessage(file, logProbabilities, logPrior, defaultProbabilities)
+        out[fileName] = naivebayes.classify_message(file, log_probabilities, log_priors, default_probabilities)
     return HttpResponse(json.dumps(out))

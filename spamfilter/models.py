@@ -13,9 +13,9 @@ EMPTY_DICT = "{}"
 
 class Distribution(models.Model):
     name = models.CharField(max_length=200)
-    logProbabilities = models.TextField(default=EMPTY_DICT)
-    logPrior = models.TextField(default='['+LOG_HALF+', '+LOG_HALF+']')
-    defaultProbabilities = models.TextField(default='')
+    log_probabilities = models.TextField(default=EMPTY_DICT)
+    log_priors = models.TextField(default='['+LOG_HALF+', '+LOG_HALF+']')
+    default_probabilities = models.TextField(default='')
 
     def learn(self):
         (spam_folder, ham_folder) = (SPAM_FOLDER, HAM_FOLDER)
@@ -30,13 +30,13 @@ class Distribution(models.Model):
         (log_probabilities_by_category, log_priors_by_category) = naivebayes.learn_distributions(file_lists)
 
         #Get default probabilities stored, as these are lost when we serialize the dicts
-        self.defaultProbabilities = json.dumps([log_probabilities_by_category[0][-1], log_probabilities_by_category[1][-1]])
+        self.default_probabilities = json.dumps([log_probabilities_by_category[0][-1], log_probabilities_by_category[1][-1]])
 
 
-        (self.logProbabilities, self.logPrior) = \
+        (self.log_probabilities, self.log_priors) = \
             (json.dumps(log_probabilities_by_category,ensure_ascii=False),\
              json.dumps(log_priors_by_category))
 
     def save(self, *args, **kwargs):
-        self.logProbabilities = self.logProbabilities.decode('latin-1')
+        self.log_probabilities = self.log_probabilities.decode('latin-1')
         super(Distribution, self).save(*args, **kwargs)
