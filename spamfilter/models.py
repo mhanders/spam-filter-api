@@ -6,8 +6,8 @@ from naivebayes import util
 from naivebayes import naivebayes
 
 TESTING_FOLDER = "naivebayes/data/testing"
-SPAM_FOLDER = "naivebayes/data/spam"
-HAM_FOLDER = "naivebayes/data/ham"
+SPAM_FOLDER = "naivebayes/data/superspam"
+HAM_FOLDER = "naivebayes/data/superham"
 
 LOG_HALF = "-0.69314718055994529"
 EMPTY_DICT = "{}"
@@ -15,7 +15,8 @@ EMPTY_DICT = "{}"
 class Distribution(models.Model):
     name = models.CharField(max_length=200)
     logProbabilities = models.TextField(default=EMPTY_DICT)
-    logPrior = models.TextField(default="["+LOG_HALF+", "+LOG_HALF+"]")
+    logPrior = models.TextField(default='['+LOG_HALF+', '+LOG_HALF+']')
+    defaultProbabilities = models.TextField(default='')
 
     def learn(self):
         testing_folder = TESTING_FOLDER
@@ -26,17 +27,22 @@ class Distribution(models.Model):
         file_lists = []
         for folder in (spam_folder, ham_folder):
             file_lists.append(util.get_files_in_folder(folder))
-        (log_probabilities_by_category, log_priors_by_category) = \
-                naivebayes.learn_distributions(file_lists)
 
-        # Here, columns and rows are indexed by 0 = 'spam' and 1 = 'ham'
-        # rows correspond to true label, columns correspond to guessed label
-        performance_measures = np.zeros([2,2])
+        (log_probabilities_by_category, log_priors_by_category) = naivebayes.learn_distributions(file_lists)
 
-        (self.logProbabilities, self.logPrior) = (json.dumps(log_probabilities_by_category, ensure_ascii=False).decode('latin-1'), json.dumps(log_priors_by_category))
+        #Get default probabilities stored, as these are lost when we serialize the dicts
+        self.defaultProbabilities = json.dumps([log_probabilities_by_category[0][-1], log_probabilities_by_category[1][-1]])
 
-        # Used for measuring performance.
-        # self.performanceMeasures = json.dumps(performance_measures)
+        # Used for measuring performance, so commented out right now
+            # Here, columns and rows are indexed by 0 = 'spam' and 1 = 'ham'
+            # rows correspond to true label, columns correspond to guessed label
+            # performance_measures = np.zeros([2,2])
+            # self.performanceMeasures = json.dumps(performance_measures)
+
+
+        (self.logProbabilities, self.logPrior) = \
+            (json.dumps(log_probabilities_by_category,ensure_ascii=False),\
+             json.dumps(log_priors_by_category))
 
     def save(self, *args, **kwargs):
         self.logProbabilities = self.logProbabilities.decode('latin-1')
