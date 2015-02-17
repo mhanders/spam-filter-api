@@ -6,25 +6,6 @@ import numpy as np
 import util
 
 def learn_distributions(file_lists_by_category):
-    """
-    Input
-    -----
-    A two-element list. The first element is a list of spam files,
-    and the second element is a list of ham (non-spam) files.
-
-    Output
-    ------
-    (log_probabilities_by_category, log_prior)
-
-    log_probabilities_by_category : A list whose first element is a smoothed
-                                    estimate for log P(y=w_j|c=spam) (as a dict,
-                                    just as in get_log_probabilities above), and
-                                    whose second element is the same for c=ham.
-
-    log_prior_by_category : A list of estimates for the log-probabilities for
-                            each class:
-                            [est. for log P(c=spam), est. for log P(c=ham)]
-    """
     log_probs_by_category = []
     prior_by_category = []
 
