@@ -5,8 +5,8 @@ from collections import defaultdict
 from naivebayes import util
 from naivebayes import naivebayes
 
-SPAM_FOLDER = "naivebayes/data/wellspam"
-HAM_FOLDER = "naivebayes/data/wellham"
+SPAM_FOLDER = "naivebayes/data/superspam"
+HAM_FOLDER = "naivebayes/data/superham"
 
 LOG_HALF = "-0.69314718055994529"
 EMPTY_DICT = "{}"

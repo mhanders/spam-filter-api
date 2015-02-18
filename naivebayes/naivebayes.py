@@ -24,39 +24,29 @@ def classify_message(file,
                      log_prior_by_category,
                      default_probabilities,
                      names = ['spam', 'ham']):
-
-    # message_words = set(util.get_words_in_file(message_filename))
     message_words = set(file.read().split())
-    N_categories  = len(log_probabilities_by_category)
 
-    # get the union of all words encountered during training
-    all_words = []
-    for i in xrange(N_categories):
-        all_words += log_probabilities_by_category[i].keys()
-    all_words = list(set(all_words))
+    totals = [log_prior_by_category[0], log_prior_by_category[1]]
 
-    log_likelihoods = []
-    for i in xrange(N_categories):
-        total = 0
-        all_word_log_probs = log_probabilities_by_category[i]
-        for w in all_words:
-            if w in all_word_log_probs:
-                log_prob = all_word_log_probs[w]
+    all_words = set(log_probabilities_by_category[0].keys()).union(log_probabilities_by_category[1].keys())
+
+    for i in xrange(NUM_CATEGORIES):
+        for word in all_words:
+            if word in log_probabilities_by_category[i]:
+                log_prob = log_probabilities_by_category[i][word]
             else:
                 log_prob = default_probabilities[i]
-            test = (w in message_words)
-            total += test*log_prob + (1-test)*np.log(1-np.exp(log_prob))
-        log_likelihoods.append(total)
-    posterior = np.array(log_likelihoods) + np.array(log_prior_by_category)
-    winner = np.argmax(posterior)
-    return names[winner]
+            in_message = word in message_words
+            totals[i] += in_message*log_prob + (1-in_message)*np.log(1 - np.exp(log_prob))
+    if totals[0] > totals[1] or totals[1] - totals[0] < 100:
+        return names[0]
+    return names[1]
 
 def update_log_probabilities(log_probabilities, files, previous_num_files, current_num_files):
         old_normalizer = np.log(previous_num_files + NUM_CATEGORIES)
         new_normalizer = np.log(current_num_files + NUM_CATEGORIES)
 
-        counts = util.get_counts_from_request_files([x[1] for x in files.items()]) #Make sure no issues with double opening
-
+        counts = util.get_counts_from_request_files(files)
         for word in log_probabilities:
             log_probabilities[word] += old_normalizer
             if (counts[word] > 0):
