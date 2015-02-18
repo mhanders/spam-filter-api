@@ -33,6 +33,8 @@ The decision to make the app a real-time classifier was quick for me, as I figur
 
 The concept of a batch classifier is interesting. The potential gain I see from that design would be an increase in efficiency due to focussed processing. By the nature of my naive Bayes algorithm, however, I saw limited potential gain from batch processing.
 
+A large part of the design process revolved around the training endpoints. As it stands, anybody can access the training endpoints (indeed, anyone can access `/classify/` too). The training feature really relies on the idea of a caring community that would treat the filter as a community project/tool and make sure the spam/ham sent was accurate. Of course, as it stands the application is open to malicious users who could poison the Distribution entirely. Ideally some kind of authentication would be added. Perhaps that authentication could be linked to a rep-based open-source software community (users above a rep threshold would have sufficient credentials).
+
 ####Scaling
 
 By the time-intensive nature of the algorithm used, scaling would warrant many more processors/multiple threads. Random routing of users would probably be a sufficient way to distribute, although it would be worth researching if certain types of spam are more likely in certain locales. If so, location-based routing, with different Distribution models for each server location, could provide more than a latency decrease.
@@ -59,8 +61,4 @@ As another suggestion, it is entirely possible for motivated spammers to minimal
 
 #### Performance
 
-In a run on one half of testing, the app correctly classified 90/100 spam and 100/100 ham. In the remaining half of testing, the app classified 76/100 spam and 85/100 ham. So overall we saw false positive rates of 7.5%, and failed to classify about 17% of spam mail.
-
-### Improvements
-
-Improvements on the algorithm, improvements to design.
+In a testing run using some of the data provided, the app correctly classified 176/200 spam and 185/200 ham. So overall we saw false positive rates of 7.5%, and failed to classify about 17% of spam mail.
