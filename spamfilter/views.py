@@ -34,25 +34,25 @@ def run_bayes(request):
 
     out = {}
     for (fileName, files) in request.FILES.lists():
-        if (len(files) > 1): # Mutliple files with the same
+        if (len(files) > 1): # Mutliple files with the same name
             out[fileName] = [naivebayes.classify_message(file, log_probabilities, log_priors, default_probabilities) for file in files]
         else:
             out[fileName] = [naivebayes.classify_message(files[0], log_probabilities, log_priors, default_probabilities)]
     return HttpResponse(json.dumps(out))
 
+
+# For additional training, these are the operations which must be performed:
+# Update default_probabilities
+# Update the log_probabilities by 1) Adding on correcting factor of log(nfiles - ncat)
+#                                 2) Raising current prob to e, then adding on count
+#                                 3) Adding back in new correcting factor of log(nfiles + newnumham + ncat)
+# Update priors
+# The methods below do the above.
+
 @csrf_exempt
 def train_ham(request):
     if not request.method == 'POST':
         return HttpResponseBadRequest(NOT_POST_MESSAGE)
-
-    # Update defaultProbabilities
-    # Update the log_probabilities by 1) Adding on correcting factor of log(nfiles - ncat)
-    #                                 2) Raising current prob to e, then adding on count
-    #                                 3) Adding back in new correcting factor of log(nfiles + newnumham + ncat)
-    #                                 4) Updating prior with
-    #                                                   s = (len(file_lists_by_category[0]) + 1)/(len(file_lists_by_category[0]) + len(file_lists_by_category[1]) + 2)
-    #                                                   log_prior_by_category = [np.log(s), np.log(1-s)]
-
     d = Distribution.objects.all()[0]
 
     (num_spam, previous_num_spam) = (d.num_spam, d.num_ham)
