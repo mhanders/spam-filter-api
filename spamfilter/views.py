@@ -12,7 +12,7 @@ NOT_POST_MESSAGE = "Only POST requests allowed"
 NUM_CATEGORIES = 2
 
 @csrf_exempt
-def runbayes(request):
+def run_bayes(request):
     # Distribution.objects.all()[0].delete()
     if not request.method == 'POST':
         return HttpResponseBadRequest(NOT_POST_MESSAGE)
@@ -50,9 +50,9 @@ def train_ham(request):
     #                                                   s = (len(file_lists_by_category[0]) + 1)/(len(file_lists_by_category[0]) + len(file_lists_by_category[1]) + 2)
     #                                                   log_prior_by_category = [np.log(s), np.log(1-s)]
 
-    d                = Distribution.objects.all()[0]
-    num_spam         = d.num_spam
-    previous_num_ham = d.num_ham
+    d = Distribution.objects.all()[0]
+
+    (num_spam, previous_num_spam) = (d.num_spam, d.num_ham)
     current_num_ham  = len(request.FILES.items()) + previous_num_ham #Handle some errors here
 
     default_probabilities    = json.loads(d.default_probabilities)
@@ -74,10 +74,11 @@ def train_ham(request):
 def train_spam(request):
     if not request.method == 'POST':
         return HttpResponseBadRequest(NOT_POST_MESSAGE)
-    d                 = Distribution.objects.all()[0]
-    num_ham           = d.num_ham
-    previous_num_spam = d.num_spam
-    current_num_spam  = len(request.FILES.items()) + previous_num_spam #Handle some errors here
+
+    d = Distribution.objects.all()[0]
+
+    (num_ham, previous_num_spam) = (d.num_ham, d.num_spam)
+    current_num_spam = len(request.FILES.items()) + previous_num_spam
 
     default_probabilities    = json.loads(d.default_probabilities)
     default_probabilities[0] = -np.log(current_num_spam + NUM_CATEGORIES)

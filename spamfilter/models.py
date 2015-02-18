@@ -14,14 +14,13 @@ EMPTY_DICT = "{}"
 class Distribution(models.Model):
     log_probabilities = models.TextField(default=EMPTY_DICT)
     log_priors = models.TextField(default='['+LOG_HALF+', '+LOG_HALF+']')
-    default_probabilities = models.TextField(default='')
+    default_probabilities = models.TextField(default='') # Stored as (default_prob_for_spam, default_prob_for_ham)
     num_spam = models.IntegerField(default=0)
     num_ham = models.IntegerField(default=0)
 
     def learn(self):
         (spam_folder, ham_folder) = (SPAM_FOLDER, HAM_FOLDER)
 
-        ### Learn the distributions
         print >>sys.stderr, "Training..."
 
         file_lists = []
