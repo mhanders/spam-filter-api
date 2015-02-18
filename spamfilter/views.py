@@ -34,7 +34,10 @@ def run_bayes(request):
 
     out = {}
     for (fileName, file) in request.FILES.items():
-        out[fileName] = naivebayes.classify_message(file, log_probabilities, log_priors, default_probabilities)
+        if fileName in out:
+            out[fileName].append(naivebayes.classify_message(file, log_probabilities, log_priors, default_probabilities))
+        else:
+            out[fileName] = [naivebayes.classify_message(file, log_probabilities, log_priors, default_probabilities)]
     return HttpResponse(json.dumps(out))
 
 @csrf_exempt
