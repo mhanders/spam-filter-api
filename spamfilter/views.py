@@ -40,15 +40,6 @@ def run_bayes(request):
             out[fileName] = [naivebayes.classify_message(files[0], log_probabilities, log_priors, default_probabilities)]
     return HttpResponse(json.dumps(out))
 
-
-# For additional training, these are the operations which must be performed:
-# Update default_probabilities
-# Update the log_probabilities by 1) Adding on correcting factor of log(nfiles - ncat)
-#                                 2) Raising current prob to e, then adding on count
-#                                 3) Adding back in new correcting factor of log(nfiles + newnumham + ncat)
-# Update priors
-# The methods below do the above.
-
 @csrf_exempt
 def train_ham(request):
     if not request.method == 'POST':
@@ -103,3 +94,28 @@ def train_spam(request):
         (json.dumps(log_probabilities), json.dumps(log_priors), json.dumps(default_probabilities))
     d.save()
     return HttpResponse('Successfully trained!')
+
+def test(request):
+    d = Distribution.objects.all()[0]
+    (log_probabilities, log_priors, default_probabilities) = (json.loads(d.log_probabilities, encoding='latin-1'), \
+        json.loads(d.log_priors), json.loads(d.default_probabilities))
+    file_lists = (util.get_files_in_folder('naivebayes/data/wellTesting/testingHardHam'), util.get_files_in_folder('naivebayes/data/wellTesting/testingspam'))
+    totalHam, totalSpam, classifiedHam, classifiedSpam = 0,0,0,0
+    for f in file_lists[0]:
+        with open(f, 'r') as hamFile:
+            print >>sys.stderr, f
+            if naivebayes.classify_message(hamFile, log_probabilities, log_priors, default_probabilities) == 'ham':
+                classifiedHam += 1
+            totalHam += 1
+            if totalHam == 100:
+                break
+    for f in file_lists[1]:
+        with open(f, 'r') as spamFile:
+            print >>sys.stderr, 'SPAM IS ' + f
+            if naivebayes.classify_message(spamFile, log_probabilities, log_priors, default_probabilities) == 'spam':
+                classifiedSpam += 1
+            totalSpam += 1
+            if totalSpam == 100:
+                break
+    return HttpResponse('Correctly classified ' + str(classifiedSpam) + '/' + str(totalSpam) \
+        + ' spam and ' + str(classifiedHam) + '/' + str(totalHam))

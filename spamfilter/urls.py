@@ -6,5 +6,6 @@ urlpatterns = patterns('',
     url(r'^trainham', 'spamfilter.views.train_ham', name='trainham'),
     url(r'^trainspam', 'spamfilter.views.train_spam', name='trainspam'),
     url(r'^classify', 'spamfilter.views.run_bayes', name='classify'),
+    url(r'^test', 'spamfilter.views.test', name='test'),
     url(r'^admin/', include(admin.site.urls)),
 )
