@@ -49,15 +49,17 @@ The algorithm is "naive" because it treats all word occurences as independent of
 
 #### Improvements
 
-On its first implementation, my classifier performed rather poorly on a testing set, classifying perfectly ham messages, but actually missing more spam than random. Inspection revealed that the classifier was consistently over-aggressive in classifying ham, and that spam messages were only *just* classified as ham. Thus a linear offset (~100 between log-probabilities works well) did a solid job of increasing spam classification whilst retaining hamming rates.
+On its first implementation, my classifier performed rather poorly on a testing set, classifying perfectly ham messages, but actually missing more spam than random. Inspection revealed that the classifier was consistently over-aggressive in classifying ham, and that spam messages were only *just* classified as ham. Thus a linear offset (~100 between log-probabilities works well) did a solid job of increasing spam classification with relating little impact on hamming rates.
 
-I suspected the issue was due to an insufficiently small spam training set/high variability of spam mail.
+I suspected the issue was due to an insufficient spam training set/high variability of spam mail.
 
 The emails used to train and test this algorithm contained headers and often the majority of the text in a file would come from them. I'm skeptical of my algorithm's ability to find anything helpful in those headers, especially as the training and test data used does not correspond to a specific user (and thus spam is likely to come from a wide variety of sources). It might therefore be beneficial to ignore those headers during training and classification to save processing time and unnecessary noise.
 
 As another suggestion, it is entirely possible for motivated spammers to minimally mutate words that correspond commonly with spam, slipping past this classifier as a neutral word. Fuzzy matching could help eliminate this issue, at the cost of some more processing to pick the strongest from a set of matches.
 
 #### Performance
+
+In a run on one half of testing, the app correctly classified 90/100 spam and 100/100 ham. In the remaining half of testing, the app classified 76/100 spam and 85/100 ham. So overall we saw false positive rates of 7.5%, and failed to classify about 17% of spam mail.
 
 ### Improvements
 

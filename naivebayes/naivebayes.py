@@ -4,6 +4,7 @@ import os.path
 import numpy as np
 import util
 
+# For (spam, ham)
 NUM_CATEGORIES = 2
 
 def learn_distributions(file_lists_by_category):
@@ -36,9 +37,9 @@ def classify_message(file,
                 log_prob = log_probabilities_by_category[i][word]
             else:
                 log_prob = default_probabilities[i]
-            in_message = word in message_words
+            in_message = word in message_words # If not in our message, need to take complement of probability calculated.
             totals[i] += in_message*log_prob + (1-in_message)*np.log(1 - np.exp(log_prob))
-    if totals[0] > totals[1] or totals[1] - totals[0] < 100:
+    if totals[0] > totals[1] or totals[1] - totals[0] < 100: # Offset. See readme.md
         return names[0]
     return names[1]
 

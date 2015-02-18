@@ -8,7 +8,19 @@ from django import forms
 from models import Distribution
 from naivebayes import util, naivebayes
 
+### Testing features
+TEST = True
+END_TEST_MESSAGE = "Correctly classified %d/%d spam and %d/%d ham."
+NOT_TESTING_MODE = "Testing not enabled. /test/ only available if TEST is enabled."
+TESTING_HAM = "naivebayes/data/wellTesting/testingHardHam"
+TESTING_SPAM = "naivebayes/data/wellTesting/testingspam"
+###
+
+## HttpResponse messages
+SUCCESSFULLY_TRAINED = "Training successful. Thank you for your help."
 NOT_POST_MESSAGE = "Bad Request -- Only POST requests allowed"
+
+## For (spam, ham)
 NUM_CATEGORIES = 2
 
 @csrf_exempt
@@ -46,12 +58,14 @@ def train_ham(request):
         return HttpResponseBadRequest(NOT_POST_MESSAGE)
     d = Distribution.objects.all()[0]
 
+    # We need to know the total number of files we've trained over, which is about to change.
     (num_spam, previous_num_spam) = (d.num_spam, d.num_ham)
     uploaded_files = []
     for (file_name, files) in request.FILES.lists():
         uploaded_files += files
-    current_num_ham  = len(uploaded_files) + previous_num_ham #Handle some errors here
+    current_num_ham  = len(uploaded_files) + previous_num_ham
 
+    # With more ham files, we need to update the ham default probability
     default_probabilities    = json.loads(d.default_probabilities)
     default_probabilities[1] = -np.log(current_num_ham + NUM_CATEGORIES)
 
@@ -59,13 +73,14 @@ def train_ham(request):
 
     log_probabilities[1] = naivebayes.update_log_probabilities(log_probabilities[1], uploaded_files, previous_num_ham, current_num_ham)
 
+    # Priors also need updating based off of new file numbers
     spam_prior = (num_spam + 1.0) / (num_spam + current_num_ham + 2.0)
     log_priors = [np.log(spam_prior), np.log(1-spam_prior)]
 
     (d.log_probabilities, d.log_priors, d.default_probabilities) = \
         (json.dumps(log_probabilities), json.dumps(log_priors), json.dumps(default_probabilities))
     d.save()
-    return HttpResponse('Successfully trained!')
+    return HttpResponse(SUCCESSFULLY_TRAINED)
 
 @csrf_exempt
 def train_spam(request):
@@ -74,12 +89,14 @@ def train_spam(request):
 
     d = Distribution.objects.all()[0]
 
+    # We need to know the total number of files we've trained over, which is about to change.
     (num_ham, previous_num_spam) = (d.num_ham, d.num_spam)
     uploaded_files = []
     for (file_name, files) in request.FILES.lists():
         uploaded_files += files
     current_num_spam = len(uploaded_files) + previous_num_spam
 
+    # With more spam files, we need to update the spam default probability
     default_probabilities    = json.loads(d.default_probabilities)
     default_probabilities[0] = -np.log(current_num_spam + NUM_CATEGORIES)
 
@@ -87,35 +104,38 @@ def train_spam(request):
 
     log_probabilities[0] = naivebayes.update_log_probabilities(log_probabilities[0], uploaded_files, previous_num_spam, current_num_spam)
 
+    # Priors also need updating based off of new file numbers
     spam_prior = (current_num_spam + 1.0) / (current_num_spam + num_ham + 2.0)
     log_priors = [np.log(spam_prior), np.log(1-spam_prior)]
 
     (d.log_probabilities, d.log_priors, d.default_probabilities) = \
         (json.dumps(log_probabilities), json.dumps(log_priors), json.dumps(default_probabilities))
     d.save()
-    return HttpResponse('Successfully trained!')
+    return HttpResponse(SUCCESSFULLY_TRAINED)
 
+
+### Only runnable when TEST = True.
+### Here as convenience simply to give performance stats.
 def test(request):
+    if not TEST:
+        return HttpResponseBadRequest(NOT_TESTING_MODE)
     d = Distribution.objects.all()[0]
     (log_probabilities, log_priors, default_probabilities) = (json.loads(d.log_probabilities, encoding='latin-1'), \
         json.loads(d.log_priors), json.loads(d.default_probabilities))
-    file_lists = (util.get_files_in_folder('naivebayes/data/wellTesting/testingHardHam'), util.get_files_in_folder('naivebayes/data/wellTesting/testingspam'))
-    totalHam, totalSpam, classifiedHam, classifiedSpam = 0,0,0,0
+    file_lists = (util.get_files_in_folder(TESTING_HAM), util.get_files_in_folder(TESTING_SPAM))
+    total_ham, total_spam, classified_ham, classified_spam = 0,0,0,0
     for f in file_lists[0]:
-        with open(f, 'r') as hamFile:
-            print >>sys.stderr, f
-            if naivebayes.classify_message(hamFile, log_probabilities, log_priors, default_probabilities) == 'ham':
-                classifiedHam += 1
-            totalHam += 1
-            if totalHam == 100:
+        with open(f, 'r') as ham_file:
+            if naivebayes.classify_message(ham_file, log_probabilities, log_priors, default_probabilities) == 'ham':
+                classified_ham += 1
+            total_ham += 1
+            if total_ham == 2: # Only test 100 ham files
                 break
     for f in file_lists[1]:
-        with open(f, 'r') as spamFile:
-            print >>sys.stderr, 'SPAM IS ' + f
-            if naivebayes.classify_message(spamFile, log_probabilities, log_priors, default_probabilities) == 'spam':
-                classifiedSpam += 1
-            totalSpam += 1
-            if totalSpam == 100:
+        with open(f, 'r') as spam_file:
+            if naivebayes.classify_message(spam_file, log_probabilities, log_priors, default_probabilities) == 'spam':
+                classified_spam += 1
+            total_spam += 1
+            if total_spam == 2: # Only test 100 spam files
                 break
-    return HttpResponse('Correctly classified ' + str(classifiedSpam) + '/' + str(totalSpam) \
-        + ' spam and ' + str(classifiedHam) + '/' + str(totalHam))
+    return HttpResponse(END_TEST_MESSAGE % (classified_spam, total_spam, classified_ham, total_ham))
