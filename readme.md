@@ -1,4 +1,4 @@
-## Spam Filter API
+## Spam Filter API - [https://quiet-sierra-1713.herokuapp.com/](https://quiet-sierra-1713.herokuapp.com/)
 
 ### Concept
 This is a simple MVP which exposes only a few HTTP endpoints to allow real time  classification of emails as either `spam` or `ham` (not spam). As an added feature, the ability to help the algorithm learn further is provided.
