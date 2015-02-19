@@ -161,3 +161,7 @@ def test(request):
             if total_spam == 100: # Only test 100 spam files
                 break
     return HttpResponse(END_TEST_MESSAGE % (classified_spam, total_spam, classified_ham, total_ham))
+
+def home(request):
+    f = open('spamfilter/resources/index.html', 'r')
+    return HttpResponse(f)
