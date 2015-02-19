@@ -5,8 +5,8 @@ from collections import defaultdict
 from naivebayes import util
 from naivebayes import naivebayes
 
-SPAM_FOLDER = "naivebayes/data/superspam"
-HAM_FOLDER = "naivebayes/data/superham"
+SPAM_FOLDER = "naivebayes/data/wellham"
+HAM_FOLDER = "naivebayes/data/wellspam"
 
 LOG_HALF = "-0.69314718055994529"
 EMPTY_DICT = "{}"
@@ -17,7 +17,7 @@ class Distribution(models.Model):
     log_priors            = models.TextField(default='['+LOG_HALF+', '+LOG_HALF+']')
     log_probabilities     = models.TextField(default=EMPTY_DICT)
     default_probabilities = models.TextField(default='') # Stored as (default_prob_for_spam, default_prob_for_ham)
-    
+
     def learn(self):
 
         print >>sys.stderr, "Training..."

@@ -23,13 +23,15 @@ Files sent to `/trainham/` or `/trainspam/` endpoints should be *known* to consi
 
 This spam filter is built on Django. Message classification is performed by a [naive Bayes classifier](http://en.wikipedia.org/wiki/Naive_Bayes_classifier).  It is backed by a Distribution model treated as a singleton which holds the algorithm's learned probabilities. The choice was made to hold the probabilities in a model and store them in the app's SQLite3 database both to increase responsiveness after the server is downed (Heroku sleeps apps and shuts down dynos daily) and to allow continued learning.
 
+In the event that the database is corrupted/scrubbed, the app is equipped with training files that will be used to generate and store a new Distribution model.
+
 ####Decisions
 
 I mainly chose to write this application in Python for its low ramp-up time and my familiarity in performing math operations with it.
 
 With my experience mainly in Java and Python, if I were not time-constrained by the challenge and believed in the possibility of extensions to the application, Java likely would have been my language of choice. This is due to my greater confidence in building a robust system in Java and suspicion that the relatively time-consuming algorithm used here might benefit from Java's agility.
 
-The decision to make the app a real-time classifier was quick for me, as I figured a lot of the utility of a spam classifier was to efficiently filter good emails *to* you and spam away from you as quickly as possible. Hence a real-time classifier modeled most closely something I feel I would wish to make on my own time.
+I made the decision to create the app as a real-time classifier as I figured a lot of the utility of a spam classifier was to efficiently filter good emails *to* you and spam away from you as quickly as possible. Hence a real-time classifier modeled most closely something I feel I would wish to make on my own time.
 
 The concept of a batch classifier is interesting. The potential gain I see from that design would be an increase in efficiency due to focussed processing. By the nature of my naive Bayes algorithm, however, I saw limited potential gain from batch processing.
 

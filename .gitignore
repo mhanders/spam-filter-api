@@ -3,7 +3,12 @@ __pycache__/
 *.py[cod]
 
 # naivebayes data -- possibly add in later
-naivebayes/data/
+naivebayes/data/ham
+naivebayes/data/spam
+naivebayes/data/superham
+naivebayes/data/superspam
+naivebayes/data/testing
+
 
 # C extensions
 *.so
