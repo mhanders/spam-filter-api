@@ -28,7 +28,7 @@ class Distribution(models.Model):
         (log_probabilities_by_category, log_priors_by_category) = naivebayes.learn_distributions(file_lists)
 
         (self.log_probabilities, self.log_priors) = \
-            (json.dumps(log_probabilities_by_category,ensure_ascii=False),\
+            (json.dumps(log_probabilities_by_category, encoding='latin-1'),\
              json.dumps(log_priors_by_category))
 
         # Store default probabilities, as these are lost when we serialize the dicts
@@ -36,7 +36,3 @@ class Distribution(models.Model):
 
         self.num_spam = len(file_lists[0])
         self.num_ham = len(file_lists[1])
-
-    def save(self, *args, **kwargs):
-        self.log_probabilities = self.log_probabilities.decode('latin-1')
-        super(Distribution, self).save(*args, **kwargs)

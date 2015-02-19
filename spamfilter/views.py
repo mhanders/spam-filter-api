@@ -41,8 +41,6 @@ def get_distribution():
 
 @csrf_exempt
 def run_bayes(request):
-    # Distribution.objects.all()[0].delete()
-    get_distribution()
     if request.method != 'POST':
         return HttpResponseBadRequest(NOT_POST_MESSAGE)
     try:
