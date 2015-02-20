@@ -10,13 +10,15 @@ HAM_FOLDER = "naivebayes/data/wellspam"
 
 LOG_HALF = "-0.69314718055994529"
 EMPTY_DICT = "{}"
+DEFAULT_LOG_PRIORS = '[%d, %d]' % (LOG_HALF, LOG_HALF)
+EMPTY_DEFAULT_PROBABILITIES = '(0,0)'
 
 class Distribution(models.Model):
     num_spam              = models.IntegerField(default=0)
     num_ham               = models.IntegerField(default=0)
-    log_priors            = models.TextField(default='['+LOG_HALF+', '+LOG_HALF+']')
+    log_priors            = models.TextField(default=DEFAULT_LOG_PRIORS)
     log_probabilities     = models.TextField(default=EMPTY_DICT)
-    default_probabilities = models.TextField(default='') # Stored as (default_prob_for_spam, default_prob_for_ham)
+    default_probabilities = models.TextField(default=EMPTY_DEFAULT_PROBABILITIES) # Stored as (default_prob_for_spam, default_prob_for_ham)
 
     def learn(self):
 
