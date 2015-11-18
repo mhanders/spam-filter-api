@@ -46,7 +46,7 @@ The biggest challenge in scaling this app would be to decide what should be done
 
 ### Algorithm
 
-The naive Bayes classifier implemented here works by learning the probabilities of certain words occuring given that the email is either spam or ham. Then, when asked to classify a new message, the algorithm will calculate the probability of that email's composition given either that it's spam or ham. The classification corresponding to the most probable scenario is the classification given. This is known as the [MAP decision rule](http://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation).
+The naive Bayes classifier implemented here works by learning the probabilities of certain words occuring given that the email is either spam or ham. It is a fleshed out version of a skeleton given in an MIT class. When asked to classify a new message, the algorithm will calculate the probability of that email's composition given either that it's spam or ham. The classification corresponding to the most probable scenario is the classification given. This is known as the [MAP decision rule](http://en.wikipedia.org/wiki/Maximum_a_posteriori_estimation).
 
 
 The algorithm is "naive" because it treats all word occurences as independent of one another. Although this is an imperfection, complexity greatly increases once one attempts to incorporate word relationships.
